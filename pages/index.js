@@ -11,6 +11,7 @@ import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations'
 
 function ProfileSidebar(props){
   
+  
   return (
     <Box as= "aside">
       <img src={`https://github.com/${props.gitHubUser}.png`} alt="userimage" style={{ borderRadius: '8px' }} /> 
