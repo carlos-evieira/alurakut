@@ -26,6 +26,27 @@ function ProfileSidebar(props){
     </Box>
   )
 }
+function ProfileRelationsBox(props) {
+  return (
+    <ProfileRelationsBoxWrapper >
+      <h2 className="smallTitle">
+        {props.title} ({props.items.length})
+      </h2>
+      <ul>
+        {/* {followers.map((follower) => {
+          return( 
+            <li key={follower.id}>
+              <a href={`https://github.com/${follower}.png`} >
+                <img src={follower.image} alt="Amigos" />
+                <span>{follower.title}</span>
+              </a>
+            </li>
+            )
+        })} */}
+      </ul>
+    </ProfileRelationsBoxWrapper>
+  )
+}
 
 export default function Home() {
   const radomUser = 'carlos-evieira'
@@ -42,6 +63,27 @@ export default function Home() {
     'marcobrunodev', 
     'felipefialho'
   ]
+
+
+  const [followers, setFollowers] = React.useState([])
+  
+  // 0- pegar o array de dados do GitHub  
+  React.useEffect(function(){
+    fetch('https://api.github.com/users/carlos-evieira/followers')
+    .then(function (respostaDoServidor){
+      if(respostaDoServidor.ok){
+        return respostaDoServidor.json()
+      }
+      throw new Error("opa, aconteceu algum problema", respostaDoServidor.status)
+    })
+    .then(function(respostaCompleta){
+    setFollowers(respostaCompleta)
+    })
+    .catch (function(erro){
+      console.error(erro)
+    }) 
+  }, [] )
+
 
   return (
     <>
@@ -95,6 +137,7 @@ export default function Home() {
         </div>
 
         <div className="ProfileRelationsArea" style={{ gridArea: 'ProfileRelationsArea' }}>
+        <ProfileRelationsBox title="Seguidores" items={followers} />
         <ProfileRelationsBoxWrapper >
             <h2 className="smallTitle">
               Comunidades ({communities.length})
