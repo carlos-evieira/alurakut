@@ -27,22 +27,27 @@ function ProfileSidebar(props){
   )
 }
 function ProfileRelationsBox(props) {
+
   return (
     <ProfileRelationsBoxWrapper >
       <h2 className="smallTitle">
         {props.title} ({props.items.length})
+        
       </h2>
       <ul>
-        {/* {followers.map((follower) => {
+          {props.items.map((items) => {
+            // items.length = Math.min(items.length, 5)
+            
           return( 
-            <li key={follower.id}>
-              <a href={`https://github.com/${follower}.png`} >
-                <img src={follower.image} alt="Amigos" />
-                <span>{follower.title}</span>
+            
+            <li key={items.id}>
+              <a href={`https://avatars.githubusercontent.com/u/${items.avatar_url}.png`} >
+                <img src={items.avatar_url} alt="Amigos" />
+                <span>{items.login}</span>
               </a>
             </li>
             )
-        })} */}
+        })}  
       </ul>
     </ProfileRelationsBoxWrapper>
   )
