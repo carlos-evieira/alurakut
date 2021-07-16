@@ -26,8 +26,9 @@ function ProfileSidebar(props){
     </Box>
   )
 }
-function ProfileRelationsBox(props) {
 
+function ProfileRelationsBox(props) {
+  
   return (
     <ProfileRelationsBoxWrapper >
       <h2 className="smallTitle">
@@ -35,19 +36,16 @@ function ProfileRelationsBox(props) {
         
       </h2>
       <ul>
-          {props.items.map((items) => {
-            // items.length = Math.min(items.length, 5)
-            
-          return( 
-            
-            <li key={items.id}>
+          {props.items.slice(0, 6).map((items) => {
+            return( 
+              <li key={items.id}>
               <a href={`https://avatars.githubusercontent.com/u/${items.avatar_url}.png`} >
                 <img src={items.avatar_url} alt="Amigos" />
                 <span>{items.login}</span>
               </a>
             </li>
             )
-        })}  
+          })}  
       </ul>
     </ProfileRelationsBoxWrapper>
   )
@@ -55,11 +53,11 @@ function ProfileRelationsBox(props) {
 
 export default function Home() {
   const radomUser = 'carlos-evieira'
-  const [communities, setCommunities] =  React.useState([{
-    id: '56468987687',
-    title: 'Eu odeio acordar cedo',
-    image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
-  }])
+  const [communities, setCommunities] =  React.useState([])
+    // id: '56468987687',
+    // title: 'Eu odeio acordar cedo',
+    // image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
+  
   const favoriteFriends = [
     'juunegreiros', 
     'omariosouto',  
@@ -73,6 +71,7 @@ export default function Home() {
   const [followers, setFollowers] = React.useState([])
   
   // 0- pegar o array de dados do GitHub  
+  // GET
   React.useEffect(function(){
     fetch('https://api.github.com/users/carlos-evieira/followers')
     .then(function (respostaDoServidor){
@@ -87,8 +86,33 @@ export default function Home() {
     .catch (function(erro){
       console.error(erro)
     }) 
-  }, [] )
+// API GraphQL
+  // POST
+  fetch('https://graphql.datocms.com/', {
+    method: 'POST',
+    headers: {
+      'Authorization': '587410b936c60de678919129321d22',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+      query: ` query {
+        allCommunities {
+          title
+          id
+          imageUrl
+          creatorSlug
+        }
+      } `}),
+  })
+  .then((response) => response.json()) // Pega o retorno do response.json e já retorna
+  .then ((respostaCompleta) => {
+    const communitiesFromDato = respostaCompleta.data.allCommunities
+    console.log(communitiesFromDato)
+    setCommunities(communitiesFromDato)
+  } )
 
+  }, [])
 
   return (
     <>
@@ -116,13 +140,26 @@ export default function Home() {
               console.log('Campo: ', dadosDoForm.get('image'))
 
               const comunidade = {
-                id: new Date().toISOString(),
                 title: dadosDoForm.get('title'),
-                image: dadosDoForm.get('image'),
+                imageUrl: dadosDoForm.get('image'),
+                creatorSlug: radomUser,
               }
 
-              const totalCommunities = [...communities, comunidade]
-              setCommunities(totalCommunities)
+              fetch('/api/comunidades', {
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(comunidade)
+              })
+              .then(async(res) => {
+                const dados = await res.json();
+                console.log(dados.newRegister)
+                const comunidade = dados.newRegister
+                const totalCommunities = [...communities, comunidade]
+                setCommunities(totalCommunities)
+              })
+
             } }>
               <input type="text" 
               placeholder="Qual vai ser o nome da sua comunidade?" 
@@ -152,9 +189,9 @@ export default function Home() {
               {communities.map((community) => {
                 return( 
                   <li key={community.id}>
-                    <a href={`/users/${community.title}`} >
+                    <a href={`/communities/${community.id}`} >
                       {/* <img src={`https://github.com/${community}.png` } alt="Amigos" /> */}
-                      <img src={community.image} alt="Amigos" />
+                      <img src={community.imageUrl} alt="Amigos" />
                       <span>{ community.title}</span>
                     </a>
                   </li>
